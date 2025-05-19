@@ -7,6 +7,7 @@ import com.currency_rate.currency_rate.Dto.ExchangeRateRequest;
 import com.currency_rate.currency_rate.Dto.ExchangeRateResponse;
 import com.currency_rate.currency_rate.Entity.Currency;
 import com.currency_rate.currency_rate.Entity.ExchangeRate;
+import com.currency_rate.currency_rate.Exception.ExceptioHandlerService;
 import com.currency_rate.currency_rate.Repo.ExchangeRateRepository;
 import com.currency_rate.currency_rate.Service.ExchangeRateService;
 import jakarta.transaction.Transactional;
@@ -29,24 +30,24 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     @Autowired
     private ExchangeRateProviderService exchangeRateProviderService;
 
+    @Autowired
+    private ExceptioHandlerService exceptioHandlerService;
+
     @Override
     @Transactional
     public ExchangeRateResponse getExchangeRate(ExchangeRateRequest request) {
         log.debug("Getting exchange rate for {} to {}", request.getSourceCurrency(), request.getTargetCurrency());
+        Currency sourceCurrency = request.getSourceCurrency();
+        Currency targetCurrency = request.getTargetCurrency();
 
-        if (!Currency.isValid(String.valueOf(request.getSourceCurrency()))) {
-            throw new RuntimeException("Invalid source currency: " + request.getSourceCurrency());
-        }
+        exceptioHandlerService.validateCurrencyCode(sourceCurrency,sourceCurrency.name());
+        exceptioHandlerService.validateCurrencyCode(targetCurrency,targetCurrency.name());
 
-        if (!Currency.isValid(String.valueOf(request.getTargetCurrency()))) {
-            throw new RuntimeException("Invalid target currency: " + request.getTargetCurrency());
-        }
-
-        Double rate = exchangeRateProviderService.convert(request.getSourceCurrency(), request.getTargetCurrency());
+        Double rate = exchangeRateProviderService.convert(sourceCurrency, targetCurrency);
 
         ExchangeRate exchangeRate = ExchangeRate.builder()
-                .sourceCurrency(request.getSourceCurrency())
-                .targetCurrency(request.getTargetCurrency())
+                .sourceCurrency(sourceCurrency)
+                .targetCurrency(targetCurrency)
                 .rate(BigDecimal.valueOf(rate))
                 .timestamp(LocalDateTime.now())
                 .build();
@@ -54,8 +55,8 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
         repo.save(exchangeRate);
 
         ExchangeRateResponse exchangeRateResponse = ExchangeRateResponse.builder()
-                .sourceCurrency(exchangeRate.getSourceCurrency())
-                .targetCurrency(exchangeRate.getTargetCurrency())
+                .sourceCurrency(sourceCurrency)
+                .targetCurrency(targetCurrency)
                 .rate(exchangeRate.getRate())
                 .timestamp(exchangeRate.getTimestamp())
                 .build();
