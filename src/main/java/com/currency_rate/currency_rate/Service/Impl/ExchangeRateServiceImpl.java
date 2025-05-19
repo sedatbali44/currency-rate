@@ -1,6 +1,8 @@
 package com.currency_rate.currency_rate.Service.Impl;
 
 import com.currency_rate.currency_rate.Client.ExchangeRateProviderService;
+import com.currency_rate.currency_rate.Dto.ConversionRequest;
+import com.currency_rate.currency_rate.Dto.ConversionResponse;
 import com.currency_rate.currency_rate.Dto.ExchangeRateRequest;
 import com.currency_rate.currency_rate.Dto.ExchangeRateResponse;
 import com.currency_rate.currency_rate.Entity.Currency;
@@ -22,7 +24,7 @@ import java.time.LocalDateTime;
 public class ExchangeRateServiceImpl implements ExchangeRateService {
 
     @Autowired
-    private ExchangeRateRepository exchangeRateRepository;
+    private ExchangeRateRepository repo;
 
     @Autowired
     private ExchangeRateProviderService exchangeRateProviderService;
@@ -49,7 +51,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        exchangeRateRepository.save(exchangeRate);
+        repo.save(exchangeRate);
 
         ExchangeRateResponse exchangeRateResponse = ExchangeRateResponse.builder()
                 .sourceCurrency(exchangeRate.getSourceCurrency())
@@ -59,5 +61,27 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                 .build();
 
         return exchangeRateResponse;
+    }
+
+    @Override
+    @Transactional
+    public ConversionResponse calculateRateAmount(ConversionRequest request) {
+        Double rate = exchangeRateProviderService.convert(request.getSourceCurrency(), request.getTargetCurrency());
+        Double convertedAmount = request.getAmount() * rate;
+
+        String message = String.format("%.2f %s is equal to %.2f %s",
+                request.getAmount(),
+                request.getSourceCurrency(),
+                convertedAmount,
+                request.getTargetCurrency());
+
+        return ConversionResponse.builder()
+                .amount(BigDecimal.valueOf(convertedAmount))
+                .sourceCurrency(request.getSourceCurrency())
+                .targetCurrency(request.getTargetCurrency())
+                .rate(BigDecimal.valueOf(rate))
+                .timestamp(LocalDateTime.now())
+                .message(message)
+                .build();
     }
 }

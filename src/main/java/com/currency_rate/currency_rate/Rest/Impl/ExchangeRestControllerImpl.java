@@ -1,5 +1,7 @@
 package com.currency_rate.currency_rate.Rest.Impl;
 
+import com.currency_rate.currency_rate.Dto.ConversionRequest;
+import com.currency_rate.currency_rate.Dto.ConversionResponse;
 import com.currency_rate.currency_rate.Dto.ExchangeRateRequest;
 import com.currency_rate.currency_rate.Dto.ExchangeRateResponse;
 import com.currency_rate.currency_rate.Repo.ExchangeRateRepository;
@@ -7,6 +9,7 @@ import com.currency_rate.currency_rate.Rest.ExchangeRestController;
 import com.currency_rate.currency_rate.Service.ExchangeRateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,5 +27,12 @@ public class ExchangeRestControllerImpl implements ExchangeRestController {
     public ExchangeRateResponse getExchangeRate(ExchangeRateRequest request) {
         return exchangeRateService.getExchangeRate(request);
     }
+
+    @Override
+    @PostMapping("/calculate-rate")
+    public ConversionResponse calculateRateAmount(ConversionRequest request) {
+        return exchangeRateService.calculateRateAmount(request);
+    }
+
 
 }
