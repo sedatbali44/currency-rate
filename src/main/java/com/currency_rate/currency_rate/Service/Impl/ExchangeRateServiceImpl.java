@@ -7,7 +7,7 @@ import com.currency_rate.currency_rate.Dto.ExchangeRateRequest;
 import com.currency_rate.currency_rate.Dto.ExchangeRateResponse;
 import com.currency_rate.currency_rate.Entity.Currency;
 import com.currency_rate.currency_rate.Entity.ExchangeRate;
-import com.currency_rate.currency_rate.Exception.ExceptioHandlerService;
+import com.currency_rate.currency_rate.Exception.ExceptionHandlerService;
 import com.currency_rate.currency_rate.Repo.ExchangeRateRepository;
 import com.currency_rate.currency_rate.Service.ExchangeRateService;
 import jakarta.transaction.Transactional;
@@ -31,7 +31,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     private ExchangeRateProviderService exchangeRateProviderService;
 
     @Autowired
-    private ExceptioHandlerService exceptioHandlerService;
+    private ExceptionHandlerService exceptioHandlerService;
 
     @Override
     @Transactional

@@ -2,11 +2,11 @@ package com.currency_rate.currency_rate.Exception.Impl;
 
 
 import com.currency_rate.currency_rate.Entity.Currency;
-import com.currency_rate.currency_rate.Exception.ExceptioHandlerService;
+import com.currency_rate.currency_rate.Exception.ExceptionHandlerService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ExceptioHandlerServiceImpl implements ExceptioHandlerService{
+public class ExceptionHandlerServiceImpl implements ExceptionHandlerService {
 
 
     @Override
