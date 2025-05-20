@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
+
 
 
 @Service
@@ -46,8 +46,8 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
         Currency sourceCurrency = request.getSourceCurrency();
         Currency targetCurrency = request.getTargetCurrency();
 
-        exceptionHandlerService.validateCurrencyCode(sourceCurrency,sourceCurrency.name());
-        exceptionHandlerService.validateCurrencyCode(targetCurrency,targetCurrency.name());
+        exceptionHandlerService.validateCurrencyCode(sourceCurrency, sourceCurrency.name());
+        exceptionHandlerService.validateCurrencyCode(targetCurrency, targetCurrency.name());
 
         Double rate = exchangeRateProviderService.convert(sourceCurrency, targetCurrency);
 
@@ -83,17 +83,11 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                 convertedAmount,
                 request.getTargetCurrency());
 
-        ConversionHistory conversionHistory = new ConversionHistory();
-        conversionHistory.setExchangeRate(BigDecimal.valueOf(rate));
-        conversionHistory.setSourceAmount(BigDecimal.valueOf(amount));
-        conversionHistory.setTargetAmount(BigDecimal.valueOf(convertedAmount));
-        conversionHistory.setSourceCurrency(request.getSourceCurrency());
-        conversionHistory.setTargetCurrency(request.getTargetCurrency());
-        conversionHistory.setReference(request.getSourceCurrency() + "-" + request.getTargetCurrency());
-        conversionHistory.setTransactionId(UUID.randomUUID().toString());
-        conversionHistory.setTransactionDate(LocalDateTime.now());
-        conversionHistoryService.save(conversionHistory);
-
+        ConversionHistory conversionHistory = conversionHistoryService.createConversionHistory(
+                request, BigDecimal.valueOf(rate), BigDecimal.valueOf(amount), BigDecimal.valueOf(convertedAmount));
+        if (conversionHistory == null) {
+            log.info("Conversion could not save for: {} to {}", request.getSourceCurrency(), request.getTargetCurrency());
+        }
         return ConversionResponse.builder()
                 .amount(BigDecimal.valueOf(convertedAmount))
                 .sourceCurrency(request.getSourceCurrency())
