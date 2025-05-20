@@ -44,9 +44,6 @@ public class ConversionHistory {
     @Column(name = "transaction_date", nullable = false)
     private LocalDateTime transactionDate;
 
-    @Column(name = "user_ip")
-    private String userIp;
-
     @Column(name = "reference")
     private String reference;
 }

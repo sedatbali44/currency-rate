@@ -21,8 +21,8 @@ public interface ConversionHistoryRepository extends JpaRepository<ConversionHis
             "WHERE (:sourceCurrency IS NULL OR c.sourceCurrency = :sourceCurrency) " +
             "AND (:targetCurrency IS NULL OR c.targetCurrency = :targetCurrency) " +
             "AND (:transactionId IS NULL OR c.transactionId = :transactionId) " +
-            "AND (:startDate IS NULL OR c.transactionDate >= :startDate) " +
-            "AND (:endDate IS NULL OR c.transactionDate <= :endDate)")
+            "AND (CAST(:startDate AS timestamp) IS NULL OR c.transactionDate >= :startDate) " +
+            "AND (CAST(:endDate AS timestamp) IS NULL OR c.transactionDate <= :endDate)")
     Page<ConversionHistory> findConversions(
             @Param("sourceCurrency") Currency sourceCurrency,
             @Param("targetCurrency") Currency targetCurrency,
