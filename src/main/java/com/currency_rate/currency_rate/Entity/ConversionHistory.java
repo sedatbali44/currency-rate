@@ -9,14 +9,18 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "conversions")
+@Table(name = "conversion_history")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Conversion {
+public class ConversionHistory {
+
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(name = "transaction_id", nullable = false, unique = true)
     private String transactionId;
 
