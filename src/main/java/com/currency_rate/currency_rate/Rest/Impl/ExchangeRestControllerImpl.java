@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @RestController
@@ -27,6 +28,12 @@ public class ExchangeRestControllerImpl implements ExchangeRestController {
 
     @Autowired
     private ConversionHistoryService conversionHistoryService;
+
+    @Override
+    @GetMapping("/get-by-transactionId")
+    public Optional<ConversionHistory> findByTransactionId(@RequestParam(required = true) String transactionId) {
+        return conversionHistoryService.findByTransactionId(transactionId);
+    }
 
     @Override
     @GetMapping("/get-rate")

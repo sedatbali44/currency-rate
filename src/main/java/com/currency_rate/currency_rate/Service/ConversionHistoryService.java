@@ -9,8 +9,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public interface ConversionHistoryService {
+
+    Optional<ConversionHistory> findByTransactionId(String transactionId);
 
     ConversionHistory createConversionHistory(ConversionRequest request,
                                              BigDecimal rate,

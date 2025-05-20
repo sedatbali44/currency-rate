@@ -10,9 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public interface ExchangeRestController {
 
+    Optional<ConversionHistory> findByTransactionId(String transactionId);
     ExchangeRateResponse getExchangeRate(ExchangeRateRequest request);
     ConversionResponse calculateRateAmount(ConversionRequest request);
     Page<ConversionHistory> findConversions(String transactionId, LocalDateTime startDate,
