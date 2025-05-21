@@ -1,9 +1,6 @@
 package com.currency_rate.currency_rate.Rest.Impl;
 
-import com.currency_rate.currency_rate.Dto.ConversionRequest;
-import com.currency_rate.currency_rate.Dto.ConversionResponse;
-import com.currency_rate.currency_rate.Dto.ExchangeRateRequest;
-import com.currency_rate.currency_rate.Dto.ExchangeRateResponse;
+import com.currency_rate.currency_rate.Dto.*;
 import com.currency_rate.currency_rate.Entity.ConversionHistory;
 import com.currency_rate.currency_rate.Entity.Currency;
 import com.currency_rate.currency_rate.Rest.ExchangeRestController;
@@ -15,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -28,6 +26,8 @@ public class ExchangeRestControllerImpl implements ExchangeRestController {
 
     @Autowired
     private ConversionHistoryService conversionHistoryService;
+
+
 
     @Override
     @GetMapping("/get-by-transactionId")
@@ -58,6 +58,12 @@ public class ExchangeRestControllerImpl implements ExchangeRestController {
             Pageable pageable
     ) {
         return conversionHistoryService.findConversions(transactionId, startDate, endDate, sourceCurrency, targetCurrency, pageable);
+    }
+
+    @Override
+    @PostMapping("/upload-conversions")
+    public void saveAllByDocument(ConversionsRequest conversions) {
+        exchangeRateService.calculateConversions(conversions);
     }
 
 

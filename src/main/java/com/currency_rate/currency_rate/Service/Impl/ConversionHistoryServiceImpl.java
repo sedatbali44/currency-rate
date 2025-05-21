@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +26,11 @@ public class ConversionHistoryServiceImpl implements ConversionHistoryService {
     @Override
     public Optional<ConversionHistory> findByTransactionId(String transactionId) {
         return repo.findByTransactionId(transactionId);
+    }
+
+    @Override
+    public void saveAll(List<ConversionHistory> conversionHistories) {
+        repo.saveAll(conversionHistories);
     }
 
     @Override

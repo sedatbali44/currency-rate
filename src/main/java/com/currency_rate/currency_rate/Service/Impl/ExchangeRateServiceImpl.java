@@ -1,10 +1,7 @@
 package com.currency_rate.currency_rate.Service.Impl;
 
 import com.currency_rate.currency_rate.Client.ExchangeRateProviderService;
-import com.currency_rate.currency_rate.Dto.ConversionRequest;
-import com.currency_rate.currency_rate.Dto.ConversionResponse;
-import com.currency_rate.currency_rate.Dto.ExchangeRateRequest;
-import com.currency_rate.currency_rate.Dto.ExchangeRateResponse;
+import com.currency_rate.currency_rate.Dto.*;
 import com.currency_rate.currency_rate.Entity.ConversionHistory;
 import com.currency_rate.currency_rate.Entity.Currency;
 import com.currency_rate.currency_rate.Entity.ExchangeRate;
@@ -19,7 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
+import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -75,28 +73,41 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     public ConversionResponse calculateRateAmount(ConversionRequest request) {
         Double amount = request.getAmount();
         Double rate = exchangeRateProviderService.convert(request.getSourceCurrency(), request.getTargetCurrency());
-        Double convertedAmount = amount * rate;
+        BigDecimal convertedAmount = calculateConvertedAmount(request.getAmount(),rate);
 
         String message = String.format("%.2f %s is equal to %.2f %s",
-                request.getAmount(),
+                amount,
                 request.getSourceCurrency(),
                 convertedAmount,
                 request.getTargetCurrency());
 
         ConversionHistory conversionHistory = conversionHistoryService.createConversionHistory(
-                request, BigDecimal.valueOf(rate), BigDecimal.valueOf(amount), BigDecimal.valueOf(convertedAmount));
+                request, BigDecimal.valueOf(rate), BigDecimal.valueOf(amount),convertedAmount);
 
         if (conversionHistory == null) {
             log.info("Conversion could not save for: {} to {}", request.getSourceCurrency(), request.getTargetCurrency());
         }
 
         return ConversionResponse.builder()
-                .amount(BigDecimal.valueOf(convertedAmount))
+                .amount(convertedAmount)
                 .sourceCurrency(request.getSourceCurrency())
                 .targetCurrency(request.getTargetCurrency())
                 .rate(BigDecimal.valueOf(rate))
                 .timestamp(LocalDateTime.now())
                 .message(message)
                 .build();
+    }
+
+
+    private BigDecimal calculateConvertedAmount(Double amount, Double rate) {
+        Double convertedAmount = amount * rate;
+        return BigDecimal.valueOf(convertedAmount);
+    }
+
+    @Override
+    public void calculateConversions(ConversionsRequest request) {
+        Currency defaultCurrency = Currency.USD;
+        Map<String, Double> allRates = exchangeRateProviderService.getAllRates(defaultCurrency);
+        //conversionHistoryService.saveAll(null);
     }
 }

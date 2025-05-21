@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface ConversionHistoryService {
@@ -27,4 +28,6 @@ public interface ConversionHistoryService {
             Currency sourceCurrency,
             Currency targetCurrency,
             Pageable pageable);
+
+    void saveAll(List<ConversionHistory> conversionHistories);
 }
