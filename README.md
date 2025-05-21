@@ -21,7 +21,7 @@ This Currency Rate Conversion API provides a comprehensive solution for retrievi
 - **Language**: Java
 - **Database**: Configured for JPA/Hibernate
 - **External API**: ExchangeRate API (v6)
-- **Documentation**: Swagger UI (if implemented)
+- **Documentation**: Swagger UI 
 
 ## API Endpoints
 ### Swagger 
