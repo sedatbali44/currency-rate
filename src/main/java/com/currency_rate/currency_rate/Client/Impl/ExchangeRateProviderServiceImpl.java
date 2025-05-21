@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 
 @Service
@@ -31,8 +32,8 @@ public class ExchangeRateProviderServiceImpl implements ExchangeRateProviderServ
 
     @Override
     public Double convert(Currency sourceCurrency, Currency targetCurrency) {
-        String url = API_URL + sourceCurrency;
-        ExchangeRateClientResponse response = restTemplate.getForObject(url, ExchangeRateClientResponse.class);
+
+        ExchangeRateClientResponse response = sendExternalRequest(sourceCurrency);
 
         if (response != null && SUCCESS_RESPONSE.equals(response.getResult())) {
             Double rate = response.getConversion_rates().get(targetCurrency.name());
@@ -44,5 +45,17 @@ public class ExchangeRateProviderServiceImpl implements ExchangeRateProviderServ
         } else {
             throw new RuntimeException("Failed to retrieve exchange rates");
         }
+    }
+
+    @Override
+    public Map<String, Double> getAllRates(Currency sourceCurrency) {
+        ExchangeRateClientResponse response = sendExternalRequest(sourceCurrency);
+        return response.getConversion_rates();
+    }
+
+    private ExchangeRateClientResponse sendExternalRequest(Currency sourceCurrency) {
+        String url = API_URL + sourceCurrency;
+        ExchangeRateClientResponse response = restTemplate.getForObject(url, ExchangeRateClientResponse.class);
+        return response;
     }
 }

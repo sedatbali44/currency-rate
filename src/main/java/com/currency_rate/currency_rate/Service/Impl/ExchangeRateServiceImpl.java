@@ -85,9 +85,11 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
 
         ConversionHistory conversionHistory = conversionHistoryService.createConversionHistory(
                 request, BigDecimal.valueOf(rate), BigDecimal.valueOf(amount), BigDecimal.valueOf(convertedAmount));
+
         if (conversionHistory == null) {
             log.info("Conversion could not save for: {} to {}", request.getSourceCurrency(), request.getTargetCurrency());
         }
+
         return ConversionResponse.builder()
                 .amount(BigDecimal.valueOf(convertedAmount))
                 .sourceCurrency(request.getSourceCurrency())
