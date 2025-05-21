@@ -233,7 +233,8 @@ CSV file processed successfully. 2 records saved.
 
 ```
 mvn clean install
-mvn spring-boot:run
+mvn spring-boot:run or docker-compose up -d  
+(enable docker compose in properties file before running on docker)
 ```
 
 The application will be available at `http://localhost:8080`.
