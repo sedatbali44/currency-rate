@@ -30,7 +30,7 @@ This Currency Rate Conversion API provides a comprehensive solution for retrievi
 Retrieves the current exchange rate between two currencies.
 
 ```
-GET /api/v1/exchange/get-rate
+GET http://localhost:8080/api/v1/exchange/get-rate
 ```
 
 **Parameters**:
@@ -57,7 +57,7 @@ GET http://localhost:8080/api/v1/exchange/get-rate?sourceCurrency=AWG&targetCurr
 Converts an amount from one currency to another.
 
 ```
-POST /api/v1/exchange/calculate-rate
+POST http://localhost:8080/api/v1/exchange/calculate-rate?sourceCurrency=USD&targetCurrency=EUR&amount=83
 ```
 
 **Request Body**:
