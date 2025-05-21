@@ -17,11 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,16 +117,30 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     public ResponseEntity<String> calculateConversions(MultipartFile file) {
         Currency defaultCurrency = Currency.USD;
         Map<String, Double> allRates = exchangeRateProviderService.getAllRates(defaultCurrency);
-
+        int rowSize = 0;
         try {
             List<ConversionRequest> conversionRequests = parseCSV(file);
             for (ConversionRequest conversionRequest : conversionRequests) {
-                //Currency targetCurrency = conversionRequest.getTargetCurrency();
-                //Double rate = allRates.get(targetCurrency.name());
-                calculateRateAmount(conversionRequest);
+                Double sourceRate = allRates.get(conversionRequest.getSourceCurrency().name());
+                Double targetRate = allRates.get(conversionRequest.getTargetCurrency().name());
+
+                BigDecimal amount = BigDecimal.valueOf(conversionRequest.getAmount());
+                BigDecimal usdAmount = amount.divide(BigDecimal.valueOf(sourceRate), 10, RoundingMode.HALF_UP);
+                BigDecimal convertedAmount = usdAmount.multiply(BigDecimal.valueOf(targetRate));
+
+                ConversionHistory conversionHistory = conversionHistoryService.createConversionHistory(
+                        conversionRequest,
+                        BigDecimal.valueOf(sourceRate),
+                        amount,
+                        convertedAmount
+                );
+
+                if (conversionHistory != null) {
+                    rowSize++;
+                }
             }
 
-            return ResponseEntity.ok("CSV file processed successfully");
+            return ResponseEntity.ok("CSV file processed successfully. " + rowSize + " records saved.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to process CSV file: " + e.getMessage());
@@ -142,7 +156,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
             boolean isFirstLine = true;
 
             while ((line = br.readLine()) != null) {
-                // Skip empty lines
+
                 if (line.trim().isEmpty()) {
                     continue;
                 }
@@ -152,7 +166,6 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                     continue;
                 }
 
-                // Split by semicolon instead of comma
                 String[] values = line.split(";");
                 if (values.length >= 3) {
                     String sourceCurrencyStr = values[0].trim();
