@@ -61,13 +61,11 @@ Converts an amount from one currency to another.
 POST http://localhost:8080/api/v1/exchange/calculate-rate?sourceCurrency=USD&targetCurrency=EUR&amount=83
 ```
 
-**Request Body**:
-```json
-{
-    "sourceCurrency": "USD",
-    "targetCurrency": "EUR",
-    "amount": 100.00
-}
+**Request Params**:
+```
+    sourceCurrency = "USD"
+    targetCurrency = "EUR"
+    amount   = 100.00
 ```
 
 **Example Response**:
