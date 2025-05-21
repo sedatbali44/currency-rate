@@ -36,6 +36,4 @@ public class ExchangeRate {
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 
-    @Version
-    private Long version;
 }
