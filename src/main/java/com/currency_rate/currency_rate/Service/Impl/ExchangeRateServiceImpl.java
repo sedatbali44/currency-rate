@@ -13,9 +13,17 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +81,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     public ConversionResponse calculateRateAmount(ConversionRequest request) {
         Double amount = request.getAmount();
         Double rate = exchangeRateProviderService.convert(request.getSourceCurrency(), request.getTargetCurrency());
-        BigDecimal convertedAmount = calculateConvertedAmount(request.getAmount(),rate);
+        BigDecimal convertedAmount = calculateConvertedAmount(request.getAmount(), rate);
 
         String message = String.format("%.2f %s is equal to %.2f %s",
                 amount,
@@ -82,7 +90,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                 request.getTargetCurrency());
 
         ConversionHistory conversionHistory = conversionHistoryService.createConversionHistory(
-                request, BigDecimal.valueOf(rate), BigDecimal.valueOf(amount),convertedAmount);
+                request, BigDecimal.valueOf(rate), BigDecimal.valueOf(amount), convertedAmount);
 
         if (conversionHistory == null) {
             log.info("Conversion could not save for: {} to {}", request.getSourceCurrency(), request.getTargetCurrency());
@@ -105,9 +113,80 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     }
 
     @Override
-    public void calculateConversions(ConversionsRequest request) {
+    @Transactional
+    public ResponseEntity<String> calculateConversions(MultipartFile file) {
         Currency defaultCurrency = Currency.USD;
         Map<String, Double> allRates = exchangeRateProviderService.getAllRates(defaultCurrency);
-        //conversionHistoryService.saveAll(null);
+
+        try {
+            List<ConversionRequest> conversionRequests = parseCSV(file);
+            for (ConversionRequest conversionRequest : conversionRequests) {
+                //Currency targetCurrency = conversionRequest.getTargetCurrency();
+                //Double rate = allRates.get(targetCurrency.name());
+                calculateRateAmount(conversionRequest);
+            }
+
+            return ResponseEntity.ok("CSV file processed successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to process CSV file: " + e.getMessage());
+        }
     }
+
+    @Override
+    public List<ConversionRequest> parseCSV(MultipartFile file) throws IOException {
+        List<ConversionRequest> conversionRequests = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = br.readLine()) != null) {
+                // Skip empty lines
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+
+                // Split by semicolon instead of comma
+                String[] values = line.split(";");
+                if (values.length >= 3) {
+                    String sourceCurrencyStr = values[0].trim();
+                    String targetCurrencyStr = values[1].trim();
+                    String amountStr = values[2].trim();
+
+                    try {
+                        Currency sourceCurrency = Currency.valueOf(sourceCurrencyStr.toUpperCase());
+                        Currency targetCurrency = Currency.valueOf(targetCurrencyStr.toUpperCase());
+                        double amount = Double.parseDouble(amountStr);
+
+                        ConversionRequest request = ConversionRequest.builder()
+                                .sourceCurrency(sourceCurrency)
+                                .targetCurrency(targetCurrency)
+                                .amount(amount)
+                                .build();
+
+                        conversionRequests.add(request);
+
+                        // Log successful parsing
+                        System.out.println("Successfully parsed: " + sourceCurrencyStr + " to " +
+                                targetCurrencyStr + " amount: " + amountStr);
+                    } catch (IllegalArgumentException e) {
+                        System.err.println("Skipping invalid line: " + line + " - Error: " + e.getMessage());
+                    }
+                } else {
+                    System.err.println("Invalid CSV format in line: " + line +
+                            " - Expected at least 3 fields separated by semicolons");
+                }
+            }
+        }
+
+        System.out.println("Total conversion requests parsed: " + conversionRequests.size());
+        return conversionRequests;
+    }
+
 }

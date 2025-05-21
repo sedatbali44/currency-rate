@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -62,9 +65,11 @@ public class ExchangeRestControllerImpl implements ExchangeRestController {
 
     @Override
     @PostMapping("/upload-conversions")
-    public void saveAllByDocument(ConversionsRequest conversions) {
-        exchangeRateService.calculateConversions(conversions);
+    public ResponseEntity<String> uploadCSV(@RequestParam("file") MultipartFile file) {
+        return exchangeRateService.calculateConversions(file);
     }
+
+
 
 
 
