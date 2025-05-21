@@ -24,7 +24,8 @@ This Currency Rate Conversion API provides a comprehensive solution for retrievi
 - **Documentation**: Swagger UI (if implemented)
 
 ## API Endpoints
-## http://localhost:8080/swagger-ui.html
+### Swagger 
+### http://localhost:8080/swagger-ui.html
 ### Get Exchange Rate
 
 Retrieves the current exchange rate between two currencies.
