@@ -219,8 +219,8 @@ CSV file processed successfully. 2 records saved.
 2. Configure database connection in `application.properties`:
    ```
    spring.datasource.url=jdbc:mysql://localhost:3306/currency_db
-   spring.datasource.username=root
-   spring.datasource.password=password
+   spring.datasource.username=postgres
+   spring.datasource.password=
    ```
 
 3. Configure ExchangeRate API key in `ExchangeRateProviderServiceImpl.java` or through application properties:
