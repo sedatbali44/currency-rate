@@ -123,15 +123,15 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
             for (ConversionRequest conversionRequest : conversionRequests) {
                 Double sourceRate = allRates.get(conversionRequest.getSourceCurrency().name());
                 Double targetRate = allRates.get(conversionRequest.getTargetCurrency().name());
+                Double amount = conversionRequest.getAmount();
 
-                BigDecimal amount = BigDecimal.valueOf(conversionRequest.getAmount());
-                BigDecimal usdAmount = amount.divide(BigDecimal.valueOf(sourceRate), 10, RoundingMode.HALF_UP);
-                BigDecimal convertedAmount = usdAmount.multiply(BigDecimal.valueOf(targetRate));
+                Double usdAmount = amount / sourceRate;
+                BigDecimal convertedAmount = calculateConvertedAmount(usdAmount,targetRate);
 
                 ConversionHistory conversionHistory = conversionHistoryService.createConversionHistory(
                         conversionRequest,
                         BigDecimal.valueOf(sourceRate),
-                        amount,
+                        BigDecimal.valueOf(amount),
                         convertedAmount
                 );
 
