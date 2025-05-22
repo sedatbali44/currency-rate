@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -121,19 +122,8 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
         try {
             List<ConversionRequest> conversionRequests = parseCSV(file);
             for (ConversionRequest conversionRequest : conversionRequests) {
-                Double sourceRate = allRates.get(conversionRequest.getSourceCurrency().name());
-                Double targetRate = allRates.get(conversionRequest.getTargetCurrency().name());
-                Double amount = conversionRequest.getAmount();
 
-                Double usdAmount = amount / sourceRate;
-                BigDecimal convertedAmount = calculateConvertedAmount(usdAmount,targetRate);
-
-                ConversionHistory conversionHistory = conversionHistoryService.createConversionHistory(
-                        conversionRequest,
-                        BigDecimal.valueOf(sourceRate),
-                        BigDecimal.valueOf(amount),
-                        convertedAmount
-                );
+                ConversionHistory conversionHistory = calculateAmount(allRates, conversionRequest);
 
                 if (conversionHistory != null) {
                     rowSize++;
@@ -145,6 +135,24 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to process CSV file: " + e.getMessage());
         }
+    }
+
+    private ConversionHistory calculateAmount(Map<String, Double> allRates, ConversionRequest conversionRequest) {
+        Double sourceRate = allRates.get(conversionRequest.getSourceCurrency().name());
+        Double targetRate = allRates.get(conversionRequest.getTargetCurrency().name());
+        Double amount = conversionRequest.getAmount();
+
+        Double usdAmount = amount / sourceRate;
+        BigDecimal convertedAmount = calculateConvertedAmount(usdAmount, targetRate);
+
+        ConversionHistory conversionHistory = conversionHistoryService.createConversionHistory(
+                conversionRequest,
+                BigDecimal.valueOf(sourceRate),
+                BigDecimal.valueOf(amount),
+                convertedAmount
+        );
+
+        return conversionHistory;
     }
 
     @Override
