@@ -213,7 +213,7 @@ CSV file processed successfully. 2 records saved.
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/currency-rate.git
+   git clone https://github.com/sedatbali44/currency-rate.git
    ```
 
 2. Configure database connection in `application.properties`:
