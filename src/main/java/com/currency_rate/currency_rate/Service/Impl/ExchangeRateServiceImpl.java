@@ -193,7 +193,6 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
 
                         conversionRequests.add(request);
 
-                        // Log successful parsing
                         System.out.println("Successfully parsed: " + sourceCurrencyStr + " to " +
                                 targetCurrencyStr + " amount: " + amountStr);
                     } catch (IllegalArgumentException e) {
